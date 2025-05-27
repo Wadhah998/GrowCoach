@@ -832,7 +832,11 @@ def get_all_users():
                 '_created_at_obj': created_at,  # pour tri interne
                 'CV': f"http://localhost:5000/uploads/{candidate.get('resume')}" if candidate.get('resume') else None,
                 'adminCV': f"http://localhost:5000/uploads/{candidate.get('adminCV')}" if candidate.get('adminCV') else None ,
-                'formation_name': ', '.join(candidate.get('growcoach_formation', [])) if isinstance(candidate.get('growcoach_formation', []), list) else candidate.get('growcoach_formation', '')
+                'formation_name': ', '.join(candidate.get('growcoach_formation', [])) if isinstance(candidate.get('growcoach_formation', []), list) else candidate.get('growcoach_formation', '') ,
+                'has_growcoach_formation': (
+    bool(candidate.get('has_growcoach_formation')) or
+    (isinstance(candidate.get('growcoach_formation', []), list) and len(candidate.get('growcoach_formation', [])) > 0)
+)
             })
 
         # N'ajouter les companies que si on ne filtre PAS sur la formation
@@ -1195,9 +1199,9 @@ def get_admin_notifications():
 
     notifications = list(mongo.db.admin_notifications.find().sort("time", -1))
     for n in notifications:
-        n['id'] = str(n['_id'])
-        n.pop('_id', None)
-    return jsonify(notifications), 200    
+        n['_id'] = str(n['_id'])  # <-- Garde le champ _id sous forme de string
+    return jsonify(notifications), 200
+      
 
 
 @app.route('/api/company/verification-status', methods=['GET'])
@@ -1239,7 +1243,8 @@ def get_job_applicants(job_id):
                     'firstName': candidate.get('first_name', ''), # Corrected key
                     'lastName': candidate.get('last_name', ''),   # Corrected key
                     'email': candidate.get('email', ''),
-                    'resume_url': f"http://localhost:5000/uploads/{candidate.get('resume')}" if candidate.get('resume') else None # Corrected URL construction
+                    'resume_url': f"http://localhost:5000/uploads/{candidate.get('resume')}" if candidate.get('resume') else None , # Corrected URL construction
+                    'adminCV': f"http://localhost:5000/uploads/{candidate.get('adminCV')}" if candidate.get('adminCV') else None
                 })
 
         return jsonify(applicants)
