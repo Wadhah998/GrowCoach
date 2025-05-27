@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, FileSearch, BarChart3, Zap, Users, Shield, TrendingUp, Lightbulb } from 'lucide-react';
+import { FileSearch, BarChart3, Zap, Users, Shield, TrendingUp, Lightbulb } from "lucide-react";
 
 const FeatureCard = ({ icon, title, description }: { 
   icon: React.ReactNode; 

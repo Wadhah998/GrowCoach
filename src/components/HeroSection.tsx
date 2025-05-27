@@ -24,7 +24,7 @@ const HeroSection = () => {
             
             <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
               <a 
-                href="#for-candidates" 
+                href="/signup" 
                 className="group flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg font-medium shadow-lg shadow-purple-700/20 hover:shadow-purple-700/40 transition-all duration-300 hover:-translate-y-0.5"
               >
                 <User className="w-5 h-5" />
@@ -33,7 +33,7 @@ const HeroSection = () => {
               </a>
               
               <a 
-                href="#for-companies" 
+                href="/company-signup" 
                 className="group flex items-center justify-center gap-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg font-medium transition-all duration-300 hover:-translate-y-0.5"
               >
                 <Briefcase className="w-5 h-5" />
