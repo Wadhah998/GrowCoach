@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'; // Import Link
 
 const CtaSection = () => {
   return (
-    <section className="py-20 bg-gray-900 overflow-hidden relative">
+    <section id="cta-section" className="py-20 bg-gray-900 overflow-hidden relative">
       <div className="absolute inset-0 bg-gradient-to-b from-purple-900/10 via-transparent to-transparent pointer-events-none"></div>
       <div className="absolute inset-0 overflow-hidden z-0">
         <div className="absolute -top-40 left-1/2 w-96 h-96 bg-purple-700/10 rounded-full blur-3xl"></div>
@@ -18,10 +18,10 @@ const CtaSection = () => {
           <div className="relative z-10">
             <div className="text-center max-w-3xl mx-auto mb-12">
               <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                Ready to Find Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">Perfect Match</span>?
+                Prêt à trouver votre <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">Correspondance parfaite</span>?
               </h2>
               <p className="text-xl text-gray-300">
-                Join thousands of candidates and companies already benefiting from our AI-powered matching platform.
+                Rejoignez des milliers de candidats et d'entreprises qui bénéficient déjà de notre plateforme de mise en relation basée sur l'IA.
               </p>
             </div>
 
@@ -32,15 +32,15 @@ const CtaSection = () => {
                   <div className="w-16 h-16 bg-purple-900/50 rounded-full flex items-center justify-center mb-6">
                     <User className="h-8 w-8 text-purple-400" />
                   </div>
-                  <h3 className="text-2xl font-bold mb-4">For Candidates</h3>
+                  <h3 className="text-2xl font-bold mb-4">Pour les candidats</h3>
                   <p className="text-gray-400 mb-6">
-                    Create your profile, showcase your skills, and get matched with your ideal job opportunities.
+                    Créez votre profil, présentez vos compétences et trouvez des opportunités d'emploi idéales.
                   </p>
                   <Link 
                     to="/signup"
                     className="group flex items-center justify-center gap-2 w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg font-medium shadow-lg shadow-purple-700/20 hover:shadow-purple-700/40 transition-all duration-300 hover:-translate-y-0.5"
                   >
-                    Create Candidate Profile
+                    Créer un profil de candidat
                     <ExternalLink className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </div>
@@ -52,15 +52,15 @@ const CtaSection = () => {
                   <div className="w-16 h-16 bg-blue-900/50 rounded-full flex items-center justify-center mb-6">
                     <Briefcase className="h-8 w-8 text-blue-400" />
                   </div>
-                  <h3 className="text-2xl font-bold mb-4">For Companies</h3>
+                  <h3 className="text-2xl font-bold mb-4">Pour les entreprises</h3>
                   <p className="text-gray-400 mb-6">
-                    Post job opportunities and find pre-screened candidates that match your exact requirements.
+                    Publiez des offres d'emploi et trouvez des candidats présélectionnés qui correspondent exactement à vos exigences.
                   </p>
                   <Link 
                     to="/company-signup"
                     className="group flex items-center justify-center gap-2 w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg font-medium shadow-lg shadow-blue-700/20 hover:shadow-blue-700/40 transition-all duration-300 hover:-translate-y-0.5"
                   >
-                    Create Company Profile
+                    Créer un profil d'entreprise
                     <ExternalLink className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </div>
@@ -74,3 +74,5 @@ const CtaSection = () => {
 };
 
 export default CtaSection;
+
+

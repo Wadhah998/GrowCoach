@@ -16,10 +16,10 @@ const HeroSection = () => {
         <div className="flex flex-col lg:flex-row items-center gap-12">
           <div className="flex-1 text-center lg:text-left">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-              Find Your Perfect <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-500">Match</span>
+              Trouvez votre parfait <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-500">Correspondre</span>
             </h1>
             <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto lg:mx-0">
-              The intelligent career platform that connects candidates with their ideal jobs and companies with the perfect talent. Powered by AI matching to ensure the best fit for both sides.
+              La plateforme de carrière intelligente connecte les candidats aux postes idéaux et les entreprises aux talents parfaits. Optimisée par l'IA, elle garantit la meilleure adéquation pour les deux parties.
             </p>
             
             <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
@@ -28,7 +28,7 @@ const HeroSection = () => {
                 className="group flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-500 rounded-lg font-medium shadow-lg shadow-purple-700/20 hover:shadow-purple-700/40 transition-all duration-300 hover:-translate-y-0.5"
               >
                 <User className="w-5 h-5" />
-                <span>For Candidates</span>
+                <span>Pour les candidats</span>
                 <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </a>
               
@@ -37,7 +37,7 @@ const HeroSection = () => {
                 className="group flex items-center justify-center gap-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg font-medium transition-all duration-300 hover:-translate-y-0.5"
               >
                 <Briefcase className="w-5 h-5" />
-                <span>For Companies</span>
+                <span>Pour les entreprises</span>
                 <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </a>
             </div>
@@ -60,19 +60,19 @@ const HeroSection = () => {
         <div className="mt-20 pt-8 border-t border-gray-800 grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="text-center">
             <p className="text-4xl font-bold text-white">500+</p>
-            <p className="text-gray-400 mt-2">Companies</p>
+            <p className="text-gray-400 mt-2">Entreprises</p>
           </div>
           <div className="text-center">
             <p className="text-4xl font-bold text-white">10k+</p>
-            <p className="text-gray-400 mt-2">Candidates</p>
+            <p className="text-gray-400 mt-2">Candidats</p>
           </div>
           <div className="text-center">
             <p className="text-4xl font-bold text-white">95%</p>
-            <p className="text-gray-400 mt-2">Success Rate</p>
+            <p className="text-gray-400 mt-2">Taux de réussite</p>
           </div>
           <div className="text-center">
             <p className="text-4xl font-bold text-white">7k+</p>
-            <p className="text-gray-400 mt-2">Job Matches</p>
+            <p className="text-gray-400 mt-2">Correspondances d'emploi</p>
           </div>
         </div>
       </div>

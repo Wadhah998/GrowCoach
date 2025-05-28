@@ -6,46 +6,46 @@ const HowItWorksSection = () => {
 
   const candidateSteps = [
     {
-      title: 'Create Your Profile',
-      description: 'Sign up and build your professional profile with your skills, experience, and career preferences.',
+      title: 'Créez votre profil',
+      description: 'Inscrivez-vous et créez votre profil professionnel avec vos compétences, votre expérience et vos préférences de carrière.',
       image: 'https://images.pexels.com/photos/3760069/pexels-photo-3760069.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
     },
     {
-      title: 'Skill Assessment',
-      description: 'Take our tailored assessments to verify your skills and stand out to potential employers.',
+      title: 'Évaluation des compétences',
+      description: 'Passez nos évaluations sur mesure pour vérifier vos compétences et vous démarquer auprès des employeurs potentiels.',
       image: 'https://images.pexels.com/photos/8867431/pexels-photo-8867431.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
     },
     {
-      title: 'Receive Matches',
-      description: 'Our AI algorithm will match you with jobs that align with your skills and career goals.',
+      title: 'Recevoir des matchs',
+      description: 'Notre algorithme d`IA vous proposera des emplois qui correspondent à vos compétences et à vos objectifs de carrière.',
       image: 'https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
     },
     {
-      title: 'Apply & Connect',
-      description: 'Apply with one click and connect directly with companies interested in your profile.',
+      title: 'Postuler et se connecter',
+      description: 'Postulez en un clic et connectez-vous directement avec les entreprises intéressées par votre profil.',
       image: 'https://images.pexels.com/photos/3205570/pexels-photo-3205570.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
     }
   ];
 
   const companySteps = [
     {
-      title: 'Create Company Profile',
-      description: 'Build your company profile highlighting your culture, benefits, and what makes you unique.',
+      title: 'Créer un profil d`entreprise',
+      description: 'Créez le profil de votre entreprise en mettant en valeur votre culture, vos avantages et ce qui vous rend unique.',
       image: 'https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
     },
     {
-      title: 'Post Job Opportunities',
-      description: 'Create detailed job listings with required skills, experience, and other preferences.',
+      title: 'Publier des offres d`emploi',
+      description: 'Créez des offres d’emploi détaillées avec les compétences, l’expérience et d’autres préférences requises.',
       image: 'https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
     },
     {
-      title: 'Review Matched Candidates',
-      description: 'Browse through pre-screened candidates that match your job requirements.',
+      title: 'Examiner les candidats sélectionnés',
+      description: 'Parcourez les candidats présélectionnés qui correspondent aux exigences de votre poste.',
       image: 'https://images.pexels.com/photos/7176026/pexels-photo-7176026.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
     },
     {
-      title: 'Connect & Hire',
-      description: 'Reach out to candidates, schedule interviews, and make hiring decisions with confidence.',
+      title: 'Connectez-vous et embauchez',
+      description: 'Contactez les candidats, planifiez des entretiens et prenez des décisions d`embauche en toute confiance.',
       image: 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
     }
   ];
@@ -57,13 +57,13 @@ const HowItWorksSection = () => {
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="inline-block px-3 py-1 bg-purple-900/30 text-purple-400 rounded-full text-sm font-medium mb-4">
-            How It Works
+            Comment ça marche
           </span>
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Simple Process, Powerful Results
+            Processus simple, résultats puissants
           </h2>
           <p className="text-xl text-gray-400">
-            Our platform makes it easy for both candidates and companies to find their perfect match.
+            Notre plateforme permet aux candidats et aux entreprises de trouver facilement leur partenaire idéal.
           </p>
           
           <div className="mt-8 inline-flex p-1 bg-gray-800 rounded-lg">
@@ -74,7 +74,7 @@ const HowItWorksSection = () => {
               onClick={() => setActiveTab('candidates')}
             >
               <User className="h-5 w-5 mr-2" />
-              For Candidates
+              Pour les candidats
             </button>
             <button
               className={`flex items-center px-5 py-2 rounded-md transition-all ${
@@ -83,7 +83,7 @@ const HowItWorksSection = () => {
               onClick={() => setActiveTab('companies')}
             >
               <Briefcase className="h-5 w-5 mr-2" />
-              For Companies
+              Pour les entreprises
             </button>
           </div>
         </div>

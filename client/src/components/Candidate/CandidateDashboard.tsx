@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Bell, LogOut, User, Briefcase, Building2, ChevronRight, Star, BookOpen, FileText, List, X, Bookmark, BookmarkCheck } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
+import Footer from '../Footer';
 
 interface Profile {
   _id: string;
@@ -64,30 +65,28 @@ const CandidateDashboard = () => {
   const [savedJobs, setSavedJobs] = useState<string[]>([]);
   const navigate = useNavigate();
 
-  // Add to your state
-const [lastAppliedJob, setLastAppliedJob] = useState<{
-  job_title: string;
-  company_name: string;
-  company_logo: string;
-  company_bio: string;
-  required_skills: string[];
-  application_date: string;
-  status: string;
-  matchPercentage: number;
-} | null>(null);
+  const [lastAppliedJob, setLastAppliedJob] = useState<{
+    job_title: string;
+    company_name: string;
+    company_logo: string;
+    company_bio: string;
+    required_skills: string[];
+    application_date: string;
+    status: string;
+    matchPercentage: number;
+  } | null>(null);
 
-// Add this helper function
-const formatRelativeDate = (dateString: string) => {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-  
-  if (diffInDays === 0) return 'today';
-  if (diffInDays === 1) return 'yesterday';
-  if (diffInDays < 7) return `${diffInDays} days ago`;
-  if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
-  return formatDate(dateString);
-};
+  const formatRelativeDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffInDays === 0) return 'today';
+    if (diffInDays === 1) return 'yesterday';
+    if (diffInDays < 7) return `${diffInDays} days ago`;
+    if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
+    return formatDate(dateString);
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -111,23 +110,23 @@ const formatRelativeDate = (dateString: string) => {
   }, []);
 
   useEffect(() => {
-  const fetchSavedJobs = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/candidate/saved-jobs', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setSavedJobs(data.saved_jobs || []);
+    const fetchSavedJobs = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/candidate/saved-jobs', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setSavedJobs(data.saved_jobs || []);
+        }
+      } catch (e) {
+        setSavedJobs([]);
       }
-    } catch (e) {
-      setSavedJobs([]);
-    }
-  };
-  fetchSavedJobs();
-}, []);
+    };
+    fetchSavedJobs();
+  }, []);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -167,9 +166,7 @@ const formatRelativeDate = (dateString: string) => {
     );
     return Math.round((matchedSkills.length / requiredSkills.length) * 100);
   };
- 
 
-  
   const filteredJobs = jobs.filter(job => {
     const searchLower = searchQuery.toLowerCase();
     return (
@@ -181,14 +178,8 @@ const formatRelativeDate = (dateString: string) => {
   });
 
   const displayedJobs = activeTab === 'saved'
-  ? jobs.filter(job => savedJobs.includes(job._id))
-  : filteredJobs;
-
-  const notifications: Notification[] = [
-    { id: 1, text: 'New job match found!', time: '1h ago', unread: true },
-    { id: 2, text: 'Your application was viewed', time: '2h ago', unread: true },
-    { id: 3, text: 'Interview scheduled', time: '1d ago', unread: false }
-  ];
+    ? jobs.filter(job => savedJobs.includes(job._id))
+    : filteredJobs;
 
   const handleLogout = () => {
     localStorage.removeItem('authToken');
@@ -199,16 +190,6 @@ const formatRelativeDate = (dateString: string) => {
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short' };
     return new Date(dateString).toLocaleDateString(undefined, options);
-  };
-
-  const calculateDuration = (startDate: string, endDate?: string) => {
-    const start = new Date(startDate);
-    const end = endDate ? new Date(endDate) : new Date();
-    const years = end.getFullYear() - start.getFullYear();
-    const months = end.getMonth() - start.getMonth();
-    return `${years > 0 ? `${years} ${years === 1 ? 'year' : 'years'}` : ''} ${
-      months > 0 ? `${months} ${months === 1 ? 'month' : 'months'}` : ''
-    }`.trim();
   };
 
   const handleApply = async (jobId: string, currentApplicants: string[] = []) => {
@@ -250,26 +231,25 @@ const formatRelativeDate = (dateString: string) => {
   };
 
   const handleToggleSaveJob = async (jobId: string) => {
-  const isSaved = savedJobs.includes(jobId);
-  setSavedJobs(prev =>
-    isSaved ? prev.filter(id => id !== jobId) : [...prev, jobId]
-  );
-  try {
-    await fetch(`http://localhost:5000/candidate/save-job/${jobId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-      },
-      body: JSON.stringify({ action: isSaved ? 'unsave' : 'save' }),
-    });
-  } catch (e) {
-    // Optionnel : rollback du state si erreur
-  }
-};
+    const isSaved = savedJobs.includes(jobId);
+    setSavedJobs(prev =>
+      isSaved ? prev.filter(id => id !== jobId) : [...prev, jobId]
+    );
+    try {
+      await fetch(`http://localhost:5000/candidate/save-job/${jobId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+        },
+        body: JSON.stringify({ action: isSaved ? 'unsave' : 'save' }),
+      });
+    } catch (e) {
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="flex flex-col min-h-screen bg-gray-900 text-white">
       {/* Header */}
       <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
@@ -322,7 +302,7 @@ const formatRelativeDate = (dateString: string) => {
                     className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-700 w-full text-left text-red-400"
                   >
                     <LogOut className="h-4 w-4" />
-                    Logout
+                    Déconnexion
                   </button>
                 </div>
               )}
@@ -350,7 +330,7 @@ const formatRelativeDate = (dateString: string) => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6">
+      <main className="flex-grow container mx-auto px-4 py-6">
         <div className="mb-8">
           <div className="relative w-full max-w-3xl mx-auto">
             <div className="flex items-center">
@@ -370,7 +350,7 @@ const formatRelativeDate = (dateString: string) => {
           <div className="lg:w-2/3">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold">
-                {activeTab === 'jobs' ? 'Recommended Jobs' : 'Saved Jobs'}
+                {activeTab === 'jobs' ? 'Emplois recommandés' : 'Emplois enregistrés'}
               </h2>
               <span className="text-gray-400">
                 {filteredJobs.length} {filteredJobs.length === 1 ? 'job' : 'jobs'} trouvé
@@ -446,10 +426,6 @@ const formatRelativeDate = (dateString: string) => {
                           </div>
 
                           <div className="mt-6 flex items-center justify-between gap-2">
-                            <button className="text-purple-400 hover:text-purple-300 text-sm flex items-center gap-1">
-                              Learn More
-                              <ChevronRight className="w-4 h-4" />
-                            </button>
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => handleToggleSaveJob(job._id)}
@@ -500,172 +476,103 @@ const formatRelativeDate = (dateString: string) => {
             )}
           </div>
 
-<div className="lg:w-1/3 space-y-6">
-  {/* Last Applied Job Card with Neon Animation */}
-  <div className="relative group">
-    <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500 rounded-lg opacity-70 group-hover:opacity-100 transition-opacity duration-500 blur-md animate-pulse"></div>
-    <div className="relative bg-gray-800/90 p-6 rounded-lg border border-gray-700 group-hover:border-purple-400 transition-all duration-300 backdrop-blur-sm">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-blue-200">
-          Dernière candidature
-        </h3>
-        <span className="px-2 py-1 text-xs bg-purple-900/50 text-purple-100 rounded-full border border-purple-700/50">
-          Status: {lastAppliedJob?.status || 'Pending'}
-        </span>
-      </div>
-      
-      {lastAppliedJob ? (
-        <>
-          <div className="flex items-start gap-4">
-            <div className="relative">
-              <img
-                src={lastAppliedJob.company_logo || "https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg"}
-                alt={lastAppliedJob.company_name}
-                className="w-14 h-14 rounded-lg object-cover border border-purple-500/30"
-              />
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-purple-500 rounded-full border-2 border-gray-800"></div>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold text-white">{lastAppliedJob.job_title}</h4>
-              <p className="text-purple-300">{lastAppliedJob.company_name}</p>
-              <p className="text-sm text-gray-400 mt-1">
-                Candidature envoyée {formatRelativeDate(lastAppliedJob.application_date)}
-              </p>
+          <div className="lg:w-1/3 space-y-6">
+
+            {/* Profile Card with Enhanced Design */}
+            <div className="bg-gray-800/90 p-6 rounded-lg shadow-lg border border-gray-700/50 hover:border-purple-500/30 transition-all duration-300 backdrop-blur-sm">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="relative">
+                  {profile?.avatar ? (
+                    <img
+                      src={`http://localhost:5000/uploads/${profile.avatar}`}
+                      alt="Profile"
+                      className="w-16 h-16 rounded-full object-cover border-2 border-purple-500/30 hover:border-purple-500/70 transition-all"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center text-2xl text-white">
+                      {profile?.first_name?.charAt(0) || 'U'}
+                    </div>
+                  )}
+                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-gray-800 flex items-center justify-center">
+                    <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold bg-gradient-to-r from-purple-300 to-blue-200 bg-clip-text text-transparent">
+                    {profile ? `${profile.first_name} ${profile.last_name}` : '...'}
+                  </h3>
+                  <p className="text-gray-400">
+                    {profile?.bio || 'Your position'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                {profile?.education && Array.isArray(profile.education) && profile.education.length > 0 && (
+                  <div>
+                    <h4 className="font-medium text-white flex items-center gap-2 mb-2">
+                      <BookOpen className="h-4 w-4 text-purple-300" /> Education
+                    </h4>
+                    <div className="bg-gray-700/50 p-4 rounded-lg border border-gray-600/30">
+                      <p className="font-medium text-white">{profile.education[profile.education.length - 1].degree}</p>
+                      <p className="text-purple-200">{profile.education[profile.education.length - 1].school}</p>
+                      <p className="text-gray-400 text-sm mt-1">
+                        {formatDate(profile.education[profile.education.length - 1].start_date)} -{' '}
+                        {profile.education[profile.education.length - 1].end_date
+                          ? formatDate(profile.education[profile.education.length - 1].end_date)
+                          : 'Present'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {profile?.experience && Array.isArray(profile.experience) && profile.experience.length > 0 && (
+                  <div>
+                    <h4 className="font-medium text-white flex items-center gap-2 mb-2">
+                      <Briefcase className="h-4 w-4 text-purple-300" /> Expérience
+                    </h4>
+                    {profile.experience.map((exp, idx) => (
+                      <div key={idx} className="bg-gray-700/50 p-4 rounded-lg border border-gray-600/30 mb-2">
+                        <p className="font-medium text-white">{exp.position || exp.title}</p>
+                        <p className="text-purple-200">{exp.company}</p>
+                        <p className="text-gray-400 text-sm mt-1">
+                          {exp.start_date ? formatDate(exp.start_date) : 'N/A'} -{' '}
+                          {exp.end_date ? formatDate(exp.end_date) : 'Present'}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div>
+                  <h4 className="font-medium text-white mb-2">Compétences clés</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {profile?.skills?.slice(0, 6).map((skill, idx) => (
+                      <span 
+                        key={idx} 
+                        className="px-2.5 py-1 bg-purple-900/50 text-purple-100 text-xs rounded-full border border-purple-700/50 hover:bg-purple-800/70 transition-colors"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  className="mt-6 w-full px-4 py-2.5 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg hover:from-purple-700 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-purple-500/20 flex items-center justify-center gap-2"
+                  onClick={() => navigate('/condidate-profile')}
+                >
+                  <User className="h-4 w-4" />
+                  Modifier le profil
+                </button>
+              </div>
             </div>
           </div>
-
-          <div className="mt-4 bg-gray-700/40 p-3 rounded-lg border border-gray-600/30">
-            <div className="flex items-center gap-2 text-sm text-purple-300 mb-1">
-              <Building2 className="h-4 w-4" />
-              <span>À propos {lastAppliedJob.company_name.split(' ')[0]}</span>
-            </div>
-            <p className="text-sm text-gray-300 line-clamp-3">
-              {lastAppliedJob.company_bio || 'No company description available'}
-            </p>
-          </div>
-
-          <div className="mt-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-400">Score de correspondance</span>
-              <span className="text-sm font-medium text-purple-300">
-                {lastAppliedJob.matchPercentage}%
-              </span>
-            </div>
-            <div className="w-full bg-gray-700 rounded-full h-2">
-              <div 
-                className="bg-gradient-to-r from-purple-500 to-blue-400 h-2 rounded-full" 
-                style={{ width: `${lastAppliedJob.matchPercentage}%` }}
-              ></div>
-            </div>
-          </div>
-        </>
-      ) : (
-        <div className="text-center py-6">
-          <Briefcase className="w-8 h-8 mx-auto text-gray-500 mb-2" />
-          <p className="text-gray-400">Aucune candidature récente</p>
-          <button 
-            className="mt-3 px-4 py-2 text-sm bg-gray-700/50 hover:bg-gray-700 rounded-lg text-purple-300 transition-colors"
-            onClick={() => navigate('/jobs')}
-          >
-            Parcourir les offres
-          </button>
-        </div>
-      )}
-    </div>
-  </div>
-
-  {/* Profile Card with Enhanced Design */}
-  <div className="bg-gray-800/90 p-6 rounded-lg shadow-lg border border-gray-700/50 hover:border-purple-500/30 transition-all duration-300 backdrop-blur-sm">
-    <div className="flex items-center gap-4 mb-6">
-      <div className="relative">
-        {profile?.avatar ? (
-          <img
-            src={`http://localhost:5000/uploads/${profile.avatar}`}
-            alt="Profile"
-            className="w-16 h-16 rounded-full object-cover border-2 border-purple-500/30 hover:border-purple-500/70 transition-all"
-          />
-        ) : (
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center text-2xl text-white">
-            {profile?.first_name?.charAt(0) || 'U'}
-          </div>
-        )}
-        <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-gray-800 flex items-center justify-center">
-          <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-        </div>
-      </div>
-      <div>
-        <h3 className="text-xl font-semibold bg-gradient-to-r from-purple-300 to-blue-200 bg-clip-text text-transparent">
-          {profile ? `${profile.first_name} ${profile.last_name}` : '...'}
-        </h3>
-        <p className="text-gray-400">
-          {profile?.bio || 'Your position'}
-        </p>
-      </div>
-    </div>
-
-    <div className="space-y-6">
-      {profile?.education && Array.isArray(profile.education) && profile.education.length > 0 && (
-  <div>
-    <h4 className="font-medium text-white flex items-center gap-2 mb-2">
-      <BookOpen className="h-4 w-4 text-purple-300" /> Formation
-    </h4>
-    <div className="bg-gray-700/50 p-4 rounded-lg border border-gray-600/30">
-      <p className="font-medium text-white">{profile.education[profile.education.length - 1].degree}</p>
-      <p className="text-purple-200">{profile.education[profile.education.length - 1].school}</p>
-      <p className="text-gray-400 text-sm mt-1">
-        {formatDate(profile.education[profile.education.length - 1].start_date)} -{' '}
-        {profile.education[profile.education.length - 1].end_date
-          ? formatDate(profile.education[profile.education.length - 1].end_date)
-          : 'Present'}
-      </p>
-    </div>
-  </div>
-)}
-
-{profile?.experience && Array.isArray(profile.experience) && profile.experience.length > 0 && (
-  <div>
-    <h4 className="font-medium text-white flex items-center gap-2 mb-2">
-      <Briefcase className="h-4 w-4 text-purple-300" /> Expérience
-    </h4>
-    {profile.experience.map((exp, idx) => (
-      <div key={idx} className="bg-gray-700/50 p-4 rounded-lg border border-gray-600/30 mb-2">
-        <p className="font-medium text-white">{exp.position || exp.title}</p>
-        <p className="text-purple-200">{exp.company}</p>
-        <p className="text-gray-400 text-sm mt-1">
-          {exp.start_date ? formatDate(exp.start_date) : 'N/A'} -{' '}
-          {exp.end_date ? formatDate(exp.end_date) : 'Present'}
-        </p>
-      </div>
-    ))}
-  </div>
-)}
-
-      <div>
-        <h4 className="font-medium text-white mb-2">Compétences clés</h4>
-        <div className="flex flex-wrap gap-2">
-          {profile?.skills?.slice(0, 6).map((skill, idx) => (
-            <span 
-              key={idx} 
-              className="px-2.5 py-1 bg-purple-900/50 text-purple-100 text-xs rounded-full border border-purple-700/50 hover:bg-purple-800/70 transition-colors"
-            >
-              {skill}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <button
-        className="mt-6 w-full px-4 py-2.5 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg hover:from-purple-700 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-purple-500/20 flex items-center justify-center gap-2"
-        onClick={() => navigate('/condidate-profile')}
-      >
-        <User className="h-4 w-4" />
-        Modifier le profil
-      </button>
-    </div>
-  </div>
-</div>
         </div>
       </main>
+
+      {/* Footer */}
+      <Footer />
 
       {/* Alert Popup */}
       {showAlert && (
@@ -694,7 +601,7 @@ const formatRelativeDate = (dateString: string) => {
                 onClick={() => setShowAlert(false)}
                 className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-500 transition"
               >
-                D’accord
+                D'accord
               </button>
             </div>
           </div>

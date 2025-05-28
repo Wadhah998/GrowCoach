@@ -20,7 +20,7 @@ const FeatureCard = ({ icon, title, description }: {
 const FeaturesSection = () => {
   const features = [
     {
-      icon: <Sparkles className="h-6 w-6 text-purple-400" />,
+      icon: <Lightbulb className="h-6 w-6 text-purple-400" />,
       title: 'AI Matching Algorithm',
       description: 'Our advanced matching system connects candidates to jobs based on skills, experience, and workplace preferences.'
     },
@@ -66,13 +66,13 @@ const FeaturesSection = () => {
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="inline-block px-3 py-1 bg-purple-900/30 text-purple-400 rounded-full text-sm font-medium mb-4">
-            Platform Features
+            Fonctionnalités de la plateforme
           </span>
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Everything You Need For Career Success
+            Tout ce dont vous avez besoin pour réussir votre carrière
           </h2>
           <p className="text-xl text-gray-400">
-            GrowCoach provides powerful features for both candidates and companies, creating perfect matches based on skills, experience, and culture fit.
+            GrowCoach fournit des fonctionnalités puissantes pour les candidats et les entreprises, créant des correspondances parfaites basées sur les compétences, l'expérience et l'adéquation culturelle.
           </p>
         </div>
 

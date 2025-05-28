@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Footer from '../Footer';
 
 interface CompanySignupData {
   company_name: string;
@@ -140,7 +141,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 };
 
   const companySizes = [
-    { value: '', label: 'Select company size' },
+    { value: '', label: 'Sélectionnez la taille de l`entreprise' },
     { value: '1-10', label: '1-10 employees' },
     { value: '11-50', label: '11-50 employees' },
     { value: '51-200', label: '51-200 employees' },
@@ -163,219 +164,222 @@ const handleSubmit = async (e: React.FormEvent) => {
   ];
 
   return (
-    <div className="min-h-screen pt-24 pb-12 bg-gray-900 text-gray-100 px-4">
-      <div className="max-w-4xl mx-auto bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
-        <div className="p-8">
-          <h1 className="text-3xl font-bold text-center mb-8 text-purple-400">Company Sign Up</h1>
-          
-          {errors.form && (
-            <div className="mb-6 p-4 bg-red-900/50 border border-red-500 rounded-lg">
-              {errors.form}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Company Information */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold border-b border-gray-700 pb-2">Informations sur l'entreprise</h2>
-              
-              <div>
-                <label className="block mb-2 text-sm font-medium">nom de l'entreprise *</label>
-                <input
-                  type="text"
-                  name="company_name"
-                  value={formData.company_name}
-                  onChange={handleInputChange}
-                  className={`w-full px-4 py-2 bg-gray-700 rounded-lg ${errors.company_name ? 'border border-red-500' : ''}`}
-                />
-                {errors.company_name && <p className="mt-1 text-sm text-red-400">{errors.company_name}</p>}
+    <>
+      <div className="min-h-screen pt-24 pb-12 bg-gray-900 text-gray-100 px-4">
+        <div className="max-w-4xl mx-auto bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
+          <div className="p-8">
+            <h1 className="text-3xl font-bold text-center mb-8 text-purple-400">Inscription de l'entreprise</h1>
+            
+            {errors.form && (
+              <div className="mb-6 p-4 bg-red-900/50 border border-red-500 rounded-lg">
+                {errors.form}
               </div>
+            )}
 
-              <div>
-                <label className="block mb-2 text-sm font-medium">E-mail *</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className={`w-full px-4 py-2 bg-gray-700 rounded-lg ${errors.email ? 'border border-red-500' : ''}`}
-                />
-                {errors.email && <p className="mt-1 text-sm text-red-400">{errors.email}</p>}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block mb-2 text-sm font-medium">Mot de passe *</label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-2 bg-gray-700 rounded-lg ${errors.password ? 'border border-red-500' : ''}`}
-                  />
-                  {errors.password && <p className="mt-1 text-sm text-red-400">{errors.password}</p>}
-                </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Company Information */}
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold border-b border-gray-700 pb-2">Informations sur l'entreprise</h2>
                 
                 <div>
-                  <label className="block mb-2 text-sm font-medium">Confirmez le mot de passe *</label>
-                  <input
-                    type="password"
-                    name="confirm_password"
-                    value={formData.confirm_password}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-2 bg-gray-700 rounded-lg ${errors.confirm_password ? 'border border-red-500' : ''}`}
-                  />
-                  {errors.confirm_password && <p className="mt-1 text-sm text-red-400">{errors.confirm_password}</p>}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block mb-2 text-sm font-medium">Téléphone</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 bg-gray-700 rounded-lg"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block mb-2 text-sm font-medium">Emplacement</label>
+                  <label className="block mb-2 text-sm font-medium">nom de l'entreprise *</label>
                   <input
                     type="text"
-                    name="location"
-                    value={formData.location}
+                    name="company_name"
+                    value={formData.company_name}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 bg-gray-700 rounded-lg"
+                    className={`w-full px-4 py-2 bg-gray-700 rounded-lg ${errors.company_name ? 'border border-red-500' : ''}`}
                   />
+                  {errors.company_name && <p className="mt-1 text-sm text-red-400">{errors.company_name}</p>}
                 </div>
-              </div>
 
-              <div>
-                <label className="block mb-2 text-sm font-medium">Site Web</label>
-                <input
-                  type="url"
-                  name="website"
-                  value={formData.website}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 bg-gray-700 rounded-lg"
-                  placeholder="https://example.com"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block mb-2 text-sm font-medium">Industrie *</label>
-                  <select
-                    name="industry"
-                    value={formData.industry}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-2 bg-gray-700 rounded-lg ${errors.industry ? 'border border-red-500' : ''}`}
-                  >
-                    {industries.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.industry && <p className="mt-1 text-sm text-red-400">{errors.industry}</p>}
-                </div>
-                
-                <div>
-                  <label className="block mb-2 text-sm font-medium">Taille de l'entreprise</label>
-                  <select
-                    name="company_size"
-                    value={formData.company_size}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 bg-gray-700 rounded-lg"
-                  >
-                    {companySizes.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block mb-2 text-sm font-medium">Année de fondation</label>
-                <input
-                  type="number"
-                  name="founded_year"
-                  value={formData.founded_year}
-                  onChange={handleInputChange}
-                  min="1900"
-                  max={new Date().getFullYear()}
-                  className="w-full px-4 py-2 bg-gray-700 rounded-lg"
-                />
-              </div>
-
-              <div>
-                <label className="block mb-2 text-sm font-medium">Logo de l'entreprise</label>
-                <input
-                  type="file"
-                  name="logo"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="w-full px-4 py-2 bg-gray-700 rounded-lg"
-                />
-              </div>
-
-              <div>
-                <label className="block mb-2 text-sm font-medium">Description de l'entreprise</label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  rows={3}
-                  className="w-full px-4 py-2 bg-gray-700 rounded-lg"
-                  placeholder="Tell us about your company..."
-                />
-              </div>
-            </div>
-
-            {/* Terms */}
-            <div className="pt-4">
-              <div className="flex items-start">
-                <div className="flex items-center h-5">
+                  <label className="block mb-2 text-sm font-medium">E-mail *</label>
                   <input
-                    type="checkbox"
-                    name="terms_accepted"
-                    checked={formData.terms_accepted}
-                    onChange={handleCheckboxChange}
-                    className="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500"
-                    required
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-2 bg-gray-700 rounded-lg ${errors.email ? 'border border-red-500' : ''}`}
+                  />
+                  {errors.email && <p className="mt-1 text-sm text-red-400">{errors.email}</p>}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block mb-2 text-sm font-medium">Mot de passe *</label>
+                    <input
+                      type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      className={`w-full px-4 py-2 bg-gray-700 rounded-lg ${errors.password ? 'border border-red-500' : ''}`}
+                    />
+                    {errors.password && <p className="mt-1 text-sm text-red-400">{errors.password}</p>}
+                  </div>
+                  
+                  <div>
+                    <label className="block mb-2 text-sm font-medium">Confirmez le mot de passe *</label>
+                    <input
+                      type="password"
+                      name="confirm_password"
+                      value={formData.confirm_password}
+                      onChange={handleInputChange}
+                      className={`w-full px-4 py-2 bg-gray-700 rounded-lg ${errors.confirm_password ? 'border border-red-500' : ''}`}
+                    />
+                    {errors.confirm_password && <p className="mt-1 text-sm text-red-400">{errors.confirm_password}</p>}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block mb-2 text-sm font-medium">Téléphone</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 bg-gray-700 rounded-lg"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block mb-2 text-sm font-medium">Emplacement</label>
+                    <input
+                      type="text"
+                      name="location"
+                      value={formData.location}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 bg-gray-700 rounded-lg"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-sm font-medium">Site Web</label>
+                  <input
+                    type="url"
+                    name="website"
+                    value={formData.website}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 bg-gray-700 rounded-lg"
+                    placeholder="https://example.com"
                   />
                 </div>
-                <label className="ml-2 text-sm">
-                  J'accepte les{' '}
-                  <a href="#" className="text-purple-400 hover:underline">
-                     termes et conditions
-                  </a>
-                </label>
-              </div>
-              {errors.terms_accepted && (
-                <p className="mt-1 text-sm text-red-400">{errors.terms_accepted}</p>
-              )}
-            </div>
 
-            {/* Submit Button */}
-            <div className="pt-6">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className={`w-full py-3 px-4 bg-purple-600 hover:bg-purple-500 text-white font-medium rounded-lg transition-colors ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
-              >
-                {isSubmitting ? 'Processing...' : 'Register Company'}
-              </button>
-            </div>
-          </form>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block mb-2 text-sm font-medium">Industrie *</label>
+                    <select
+                      name="industry"
+                      value={formData.industry}
+                      onChange={handleInputChange}
+                      className={`w-full px-4 py-2 bg-gray-700 rounded-lg ${errors.industry ? 'border border-red-500' : ''}`}
+                    >
+                      {industries.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.industry && <p className="mt-1 text-sm text-red-400">{errors.industry}</p>}
+                  </div>
+                  
+                  <div>
+                    <label className="block mb-2 text-sm font-medium">Taille de l'entreprise</label>
+                    <select
+                      name="company_size"
+                      value={formData.company_size}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 bg-gray-700 rounded-lg"
+                    >
+                      {companySizes.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-sm font-medium">Année de fondation</label>
+                  <input
+                    type="number"
+                    name="founded_year"
+                    value={formData.founded_year}
+                    onChange={handleInputChange}
+                    min="1900"
+                    max={new Date().getFullYear()}
+                    className="w-full px-4 py-2 bg-gray-700 rounded-lg"
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-sm font-medium">Logo de l'entreprise</label>
+                  <input
+                    type="file"
+                    name="logo"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="w-full px-4 py-2 bg-gray-700 rounded-lg"
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-sm font-medium">Description de l'entreprise</label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    rows={3}
+                    className="w-full px-4 py-2 bg-gray-700 rounded-lg"
+                    placeholder="Tell us about your company..."
+                  />
+                </div>
+              </div>
+
+              {/* Terms */}
+              <div className="pt-4">
+                <div className="flex items-start">
+                  <div className="flex items-center h-5">
+                    <input
+                      type="checkbox"
+                      name="terms_accepted"
+                      checked={formData.terms_accepted}
+                      onChange={handleCheckboxChange}
+                      className="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500"
+                      required
+                    />
+                  </div>
+                  <label className="ml-2 text-sm">
+                    J'accepte les{' '}
+                    <a href="#" className="text-purple-400 hover:underline">
+                       termes et conditions
+                    </a>
+                  </label>
+                </div>
+                {errors.terms_accepted && (
+                  <p className="mt-1 text-sm text-red-400">{errors.terms_accepted}</p>
+                )}
+              </div>
+
+              {/* Submit Button */}
+              <div className="pt-6">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`w-full py-3 px-4 bg-purple-600 hover:bg-purple-500 text-white font-medium rounded-lg transition-colors ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                >
+                  {isSubmitting ? 'Traitement...' : 'Register Company'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 };
 

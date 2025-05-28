@@ -16,9 +16,9 @@ const TestimonialsSection = () => {
   const testimonials: Testimonial[] = [
     {
       id: 1,
-      content: "GrowCoach matched me with a job that perfectly aligned with my skills and career goals. The AI-driven matches were incredibly relevant, and I found my dream position within two weeks!",
+      content: "GrowCoach m'a trouvé un emploi parfaitement adapté à mes compétences et à mes objectifs de carrière. Les correspondances basées sur l'IA étaient incroyablement pertinentes, et j'ai trouvé le poste de mes rêves en deux semaines !",
       name: "Sarah Johnson",
-      role: "UX Designer",
+      role: "Concepteur UX",
       company: "TechInnovate",
       rating: 5,
       image: "https://images.pexels.com/photos/773371/pexels-photo-773371.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
@@ -26,7 +26,7 @@ const TestimonialsSection = () => {
     },
     {
       id: 2,
-      content: "As a tech startup, finding developers with the right skill set was always challenging until we found GrowCoach. Their matching algorithm brought us candidates who were not only technically skilled but also a great culture fit.",
+      content: "En tant que start-up technologique, trouver des développeurs possédant les compétences requises était toujours un défi, jusqu'à ce que nous découvrions GrowCoach. Leur algorithme de mise en relation nous a permis de trouver des candidats possédant non seulement des compétences techniques, mais aussi une excellente adéquation culturelle.",
       name: "Michael Chen",
       role: "CTO",
       company: "DataFlow Systems",
@@ -36,7 +36,7 @@ const TestimonialsSection = () => {
     },
     {
       id: 3,
-      content: "The skill assessments on GrowCoach helped me identify areas where I needed improvement. After working on those skills, I received much better job matches and landed a role that advanced my career significantly.",
+      content: "Les évaluations de compétences sur GrowCoach m'ont aidé à identifier mes points faibles. Après avoir travaillé sur ces compétences, j'ai obtenu de bien meilleures correspondances et j'ai décroché un poste qui a considérablement fait progresser ma carrière.",
       name: "David Rodriguez",
       role: "Full Stack Developer",
       company: "CodeSphere",
@@ -46,7 +46,7 @@ const TestimonialsSection = () => {
     },
     {
       id: 4,
-      content: "Our hiring process has become 70% more efficient since using GrowCoach. The pre-screened candidates save us countless hours in the recruitment process, and the quality of matches is outstanding.",
+      content: "Notre processus de recrutement a été 70 % plus efficace depuis que nous utilisons GrowCoach. Les candidats présélectionnés nous font gagner un temps précieux et la qualité des correspondances est exceptionnelle.",
       name: "Rebecca Taylor",
       role: "HR Director",
       company: "Global Finance Group",
@@ -76,13 +76,13 @@ const TestimonialsSection = () => {
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="inline-block px-3 py-1 bg-purple-900/30 text-purple-400 rounded-full text-sm font-medium mb-4">
-            Success Stories
+            Histoires de réussite
           </span>
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            What Our Users Say
+            Ce que disent nos utilisateurs
           </h2>
           <p className="text-xl text-gray-400">
-            Real experiences from candidates and companies who found their perfect match on GrowCoach.
+            Expériences réelles de candidats et d'entreprises qui ont trouvé leur partenaire idéal sur GrowCoach.
           </p>
           
           <div className="mt-8 inline-flex p-1 bg-gray-800 rounded-lg">
@@ -95,7 +95,7 @@ const TestimonialsSection = () => {
                 setCurrentIndex(0);
               }}
             >
-              All Stories
+              Toutes les histoires
             </button>
             <button
               className={`px-5 py-2 rounded-md transition-all ${
@@ -106,7 +106,7 @@ const TestimonialsSection = () => {
                 setCurrentIndex(0);
               }}
             >
-              Candidates
+              Candidats
             </button>
             <button
               className={`px-5 py-2 rounded-md transition-all ${
@@ -117,7 +117,7 @@ const TestimonialsSection = () => {
                 setCurrentIndex(0);
               }}
             >
-              Companies
+              Entreprises
             </button>
           </div>
         </div>

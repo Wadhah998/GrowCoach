@@ -6,28 +6,28 @@ const Footer = () => {
   
   const links = {
     company: [
-      { name: 'About Us', href: '#' },
-      { name: 'Our Team', href: '#' },
-      { name: 'Careers', href: '#' },
-      { name: 'Press', href: '#' },
+      { name: 'À propos de nous', href: '#' },
+      { name: 'Notre équipe', href: '#' },
+      { name: 'Carrières', href: '#' },
+      { name: 'Presse', href: '#' },
     ],
     platform: [
-      { name: 'For Candidates', href: '#' },
-      { name: 'For Companies', href: '#' },
-      { name: 'Pricing', href: '#' },
-      { name: 'Success Stories', href: '#' },
+      { name: 'Pour les candidats', href: '#' },
+      { name: 'Pour les entreprises', href: '#' },
+      { name: 'Tarifs', href: '#' },
+      { name: 'Histoires de réussite', href: '#' },
     ],
     resources: [
-      { name: 'Blog', href: '#' },
-      { name: 'Career Guides', href: '#' },
-      { name: 'Tutorials', href: '#' },
-      { name: 'Help Center', href: '#' },
+      { name: 'Blogue', href: '#' },
+      { name: 'Guides de carrière', href: '#' },
+      { name: 'Tutoriels', href: '#' },
+      { name: 'Centre d`aide', href: '#' },
     ],
     legal: [
-      { name: 'Privacy Policy', href: '#' },
-      { name: 'Terms of Service', href: '#' },
-      { name: 'Cookie Policy', href: '#' },
-      { name: 'GDPR Compliance', href: '#' },
+      { name: 'politique de confidentialité', href: '#' },
+      { name: 'Conditions d`utilisation', href: '#' },
+      { name: 'Politique en matière de cookies', href: '#' },
+      { name: 'Conformité RGPD', href: '#' },
     ],
   };
 
@@ -41,32 +41,32 @@ const Footer = () => {
               <span className="text-xl font-bold text-white">GrowCoach</span>
             </a>
             <p className="mb-6 max-w-md">
-              The intelligent career platform that connects candidates with their ideal jobs and companies with the perfect talent, using AI-powered matching.
+              La plateforme de carrière intelligente qui connecte les candidats à leurs emplois idéaux et les entreprises aux talents parfaits, grâce à la mise en correspondance alimentée par l'IA.
             </p>
             <div className="space-y-3">
               <div className="flex items-center">
                 <Mail className="h-5 w-5 mr-3 text-purple-500" />
                 <a href="mailto:contact@growcoach.com" className="hover:text-white transition-colors">
-                  contact@growcoach.com
+                  contact@grow-coach.org
                 </a>
               </div>
               <div className="flex items-center">
                 <Phone className="h-5 w-5 mr-3 text-purple-500" />
                 <a href="tel:+1234567890" className="hover:text-white transition-colors">
-                  +1 (234) 567-890
+                  (+216) 27 707 357
                 </a>
               </div>
               <div className="flex items-start">
                 <MapPin className="h-5 w-5 mr-3 text-purple-500 flex-shrink-0 mt-1" />
                 <address className="not-italic">
-                  123 Innovation Drive, San Francisco, CA 94103, USA
+                  Bureau A8-2, Imm. Golden Towers, Centre Urbain Nord, Tunis
                 </address>
               </div>
             </div>
           </div>
           
           <div>
-            <h3 className="text-lg font-semibold text-white mb-6">Company</h3>
+            <h3 className="text-lg font-semibold text-white mb-6">Entreprise</h3>
             <ul className="space-y-4">
               {links.company.map((link) => (
                 <li key={link.name}>
@@ -82,7 +82,7 @@ const Footer = () => {
           </div>
           
           <div>
-            <h3 className="text-lg font-semibold text-white mb-6">Platform</h3>
+            <h3 className="text-lg font-semibold text-white mb-6">Plate-forme</h3>
             <ul className="space-y-4">
               {links.platform.map((link) => (
                 <li key={link.name}>
@@ -98,7 +98,7 @@ const Footer = () => {
           </div>
           
           <div>
-            <h3 className="text-lg font-semibold text-white mb-6">Resources</h3>
+            <h3 className="text-lg font-semibold text-white mb-6">Ressources</h3>
             <ul className="space-y-4">
               {links.resources.map((link) => (
                 <li key={link.name}>
@@ -116,7 +116,7 @@ const Footer = () => {
         
         <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
           <div className="mb-4 md:mb-0">
-            <p>&copy; {currentYear} GrowCoach. All rights reserved.</p>
+            <p>&copy; {currentYear} GrowCoach. Tous droits réservés.</p>
           </div>
           
           <div className="flex space-x-4">

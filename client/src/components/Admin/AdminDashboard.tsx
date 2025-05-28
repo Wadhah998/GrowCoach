@@ -13,8 +13,8 @@ type User = {
   CV?: string;
   logo?: string;
   photo?: string;
-  adminCV?: string; // Added for admin CV upload
-  formation_name?: string; // Added for candidate formation
+  adminCV?: string; 
+  formation_name?: string; 
   has_growcoach_formation?: boolean;
 
 };
@@ -51,7 +51,6 @@ const AdminDashboard = () => {
   const [logoutError, setLogoutError] = useState('');
   const [formationFilter, setFormationFilter] = useState<'all' | 'with' | 'without'>('all');
 
-  // Normalize and validate user data from API
   const normalizeUserData = (users: any[]): User[] => {
     return users.map(user => ({
       _id: user._id || '',
@@ -83,7 +82,6 @@ const AdminDashboard = () => {
 
     if (!response.ok) throw new Error('Failed to approve candidate');
 
-    // Update local state
     setUsers(users.map(user => 
       user._id === candidateId ? { ...user, status: 'active' } : user
     ));
@@ -101,7 +99,6 @@ const AdminDashboard = () => {
 };
 
 
-  // Fetch users from API (moved outside useEffect for reuse)
   const fetchUsers = async () => {
     try {
       setLoading(true);
@@ -154,7 +151,6 @@ const AdminDashboard = () => {
     fetchNotifications();
   }, [navigate]);
 
-  // Handle logout
   const handleLogout = async () => {
     setIsLoggingOut(true);
     setLogoutError('');
@@ -174,7 +170,7 @@ const AdminDashboard = () => {
       }
 
       localStorage.removeItem('authToken');
-      navigate('/login');
+      navigate('/');
     } catch (err) {
       console.error('Erreur de déconnexion :', err);
       setLogoutError(err instanceof Error ? err.message : 'Déconnexion échouée');
@@ -183,7 +179,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Filter users (client-side)
   const filteredUsers = users.filter(user => {
     if (searchTerm && !user.name.toLowerCase().includes(searchTerm.toLowerCase())) {
       return false;
@@ -205,12 +200,10 @@ const AdminDashboard = () => {
     return true;
   });
 
-  // Calculate stats
   const totalUsers = users.length;
   const totalCandidates = users.filter(user => user.type === 'candidate').length;
   const totalCompanies = users.filter(user => user.type === 'company').length;
 
-  // Format date for display
   const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
@@ -220,7 +213,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Handle candidate status change (block/unblock)
   const handleCandidateStatus = async (candidateId: string, action: 'block' | 'unblock') => {
     try {
       const response = await fetch(`${API_BASE_URL}/admin/candidates/${candidateId}/status`, {
@@ -253,7 +245,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Handle company status change (verify/unverify/block/unblock)
   const handleCompanyStatus = async (companyId: string, action: 'verify' | 'unverify' | 'block' | 'unblock') => {
     try {
       const response = await fetch(`${API_BASE_URL}/admin/companies/${companyId}/status`, {
@@ -336,7 +327,6 @@ const AdminDashboard = () => {
             notification.unread ? 'bg-gray-700/50' : ''
           }`}
           onClick={async () => {
-            // Handle candidate notifications
             if (notification.type === 'new_candidate') {
               const candidateUser = users.find(
                 user => user._id === notification.candidate_id && user.type === 'candidate'
@@ -346,7 +336,6 @@ const AdminDashboard = () => {
                 setIsUserDetailsOpen(true);
               }
             }
-            // Handle company notifications
             else if (notification.type === 'verification_request') {
               const companyUser = users.find(
                 user => user._id === notification.company_id && user.type === 'company'
@@ -382,14 +371,14 @@ const AdminDashboard = () => {
                   }
                 }}
               >
-                Approve
+                Approuver
               </button>
             </div>
           )}
         </div>
       ))
     ) : (
-      <p className="px-4 py-3 text-sm text-gray-400">No notifications</p>
+      <p className="px-4 py-3 text-sm text-gray-400">Aucune notification</p>
     )}
   </div>
 )}
@@ -409,15 +398,6 @@ const AdminDashboard = () => {
 
                 {showProfileMenu && (
                   <div className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-lg py-2 z-50">
-                    <button
-                      onClick={() => {
-                        setShowProfileMenu(false);
-                        navigate('/admin/profile');
-                      }}
-                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-700 w-full text-left"
-                    >
-                      <User className="h-4 w-4" /> Profil
-                    </button>
                     <div className="border-t border-gray-700 my-1"></div>
                     <button
                       onClick={handleLogout}
@@ -850,7 +830,6 @@ const AdminDashboard = () => {
               });
             }
           } catch (err) {
-            // Optionally: afficher une erreur
           }
         }}
         className="flex flex-col gap-2"

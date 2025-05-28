@@ -6,26 +6,26 @@ const StatsSection = () => {
     {
       icon: <Users className="h-8 w-8 text-purple-400" />,
       value: '15,000+',
-      label: 'Active Users',
-      description: 'Professionals and companies using our platform daily'
+      label: 'Utilisateurs actifs',
+      description: 'Professionnels et entreprises utilisant quotidiennement notre plateforme'
     },
     {
       icon: <Briefcase className="h-8 w-8 text-purple-400" />,
       value: '5,000+',
-      label: 'Jobs Posted',
-      description: 'New opportunities added every day across industries'
+      label: 'Emplois affichés',
+      description: 'De nouvelles opportunités s`ajoutent chaque jour dans tous les secteurs d`activité'
     },
     {
       icon: <Activity className="h-8 w-8 text-purple-400" />,
       value: '92%',
-      label: 'Match Rate',
-      description: 'Success rate of our AI matching algorithm'
+      label: 'Taux de correspondance',
+      description: 'Taux de réussite de notre algorithme de correspondance IA'
     },
     {
       icon: <Target className="h-8 w-8 text-purple-400" />,
       value: '3x',
-      label: 'Faster Hiring',
-      description: 'Reducing time-to-hire compared to traditional methods'
+      label: 'Embauche plus rapide',
+      description: 'Réduire le délai d`embauche par rapport aux méthodes traditionnelles'
     }
   ];
 
@@ -40,13 +40,13 @@ const StatsSection = () => {
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <span className="inline-block px-3 py-1 bg-purple-900/30 text-purple-400 rounded-full text-sm font-medium mb-4">
-            Platform Impact
+            Impact sur la plateforme
           </span>
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Making a Difference in Recruitment
+            Faire la différence dans le recrutement
           </h2>
           <p className="text-xl text-gray-400">
-            Our platform is transforming how candidates find jobs and how companies discover talent.
+            Notre plateforme transforme la façon dont les candidats trouvent des emplois et dont les entreprises découvrent les talents.
           </p>
         </div>
 
