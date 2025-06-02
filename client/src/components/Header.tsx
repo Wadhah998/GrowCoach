@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import logo from '../assets/page_1.png';
 
 const Header: React.FC = () => (
   <header className="relative z-20">
@@ -7,9 +8,11 @@ const Header: React.FC = () => (
     <div className="absolute inset-0 bg-gradient-to-r from-purple-900/70 via-blue-900/60 to-gray-900/80 backdrop-blur-md"></div>
     <div className="relative container mx-auto px-4 py-5 flex items-center justify-between">
       <Link to="/" className="flex items-center space-x-2">
-        <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-500 drop-shadow-lg">
-          GrowCoach
-        </span>
+                   <img
+              src={logo}
+              alt="GrowCoach Logo"
+              className="h-24 w-auto drop-shadow-lg" // h-24 = plus grand que h-14
+            />
       </Link>
       <nav className="space-x-4 flex items-center">
         <Link

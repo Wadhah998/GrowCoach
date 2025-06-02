@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { BookOpen } from 'lucide-react';
 import Footer from './Footer';
+import logo from '../assets/page_1.png';
 
 interface LoginResponse {
   error: string;
@@ -111,7 +112,7 @@ const Login: React.FC = () => {
       <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col justify-center py-12 px-4">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="flex justify-center">
-            <BookOpen className="h-12 w-12 text-purple-500" />
+            <img src={logo} alt="Logo GrowCoach" className="h-34 w-auto" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold">Connectez-vous à votre compte</h2>
           <div className="mt-2 text-center text-sm text-gray-400 relative">

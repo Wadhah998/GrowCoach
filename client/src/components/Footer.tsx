@@ -1,6 +1,6 @@
 import React from 'react';
 import { BookOpen, Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react';
-
+import logo from '../assets/page_1.png';
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   
@@ -37,8 +37,8 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
           <div className="lg:col-span-2">
             <a href="#" className="flex items-center space-x-2 mb-6">
-              <BookOpen className="h-8 w-8 text-purple-500" />
-              <span className="text-xl font-bold text-white">GrowCoach</span>
+              <img src={logo} alt="Logo GrowCoach" className="h-24 w-auto" />
+              
             </a>
             <p className="mb-6 max-w-md">
               La plateforme de carrière intelligente qui connecte les candidats à leurs emplois idéaux et les entreprises aux talents parfaits, grâce à la mise en correspondance alimentée par l'IA.
