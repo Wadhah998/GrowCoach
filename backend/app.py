@@ -12,8 +12,7 @@ from models import Candidate
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_jwt_extended import (
-    get_jwt_identity, jwt_required, JWTManager, create_access_token,
-    set_access_cookies, unset_jwt_cookies, get_jwt, verify_jwt_in_request
+    get_jwt_identity, jwt_required, JWTManager, create_access_token, unset_jwt_cookies, get_jwt
 )
 from functools import wraps
 from datetime import datetime, timedelta
@@ -91,32 +90,32 @@ def sanitize_input(data):
 def unauthorized(error):
     return jsonify({
         "success": False,
-        "error": "Unauthorized",
-        "message": "Authentication required"
+        "error": "Non autorisé",
+        "message": "Authentification requise"
     }), 401
 
 @app.errorhandler(403)
 def forbidden(error):
     return jsonify({
         "success": False, 
-        "error": "Forbidden",
-        "message": "You don't have permission"
+        "error": "Interdit",
+        "message": "Vous n'avez pas la permission."
     }), 403
 
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({
         "success": False,
-        "error": "Not Found",
-        "message": "Resource not found"
+        "error": "Non trouvé",
+        "message": "Ressource non trouvée"
     }), 404
 
 @app.errorhandler(500)
 def internal_error(error):
     return jsonify({
         "success": False,
-        "error": "Internal Server Error",
-        "message": "An unexpected error occurred"
+        "error": "Erreur interne du serveur",
+        "message": "Une erreur inattendue s'est produite."
     }), 500
 
 # Routes
@@ -139,26 +138,48 @@ def protected():
 @app.route('/candidate/signup', methods=['POST'])
 def candidate_signup():
     try:
+        # --- Strong backend validation ---
+        data = request.form
+
+        required_fields = ['first_name', 'last_name', 'email', 'password', 'confirm_password']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({"error": f"{field.replace('_', ' ').capitalize()} est requis(e)"}), 400
+
+        # Email format
+        import re
+        email = data['email']
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+            return jsonify({"error": "Format d’e-mail invalide"}), 400
+
+        # Password strength
+        password = data['password']
+        if len(password) < 8:
+            return jsonify({"error": "Le mot de passe doit contenir au moins 8 caractères."}), 400
+        if password != data['confirm_password']:
+            return jsonify({"error": "Les mots de passe ne correspondent pas."}), 400
+
+        # Unique email check (candidates & companies)
+        if mongo.db.candidates.find_one({'email': email}) or mongo.db.companies.find_one({'email': email}):
+            return jsonify({"error": "E-mail déjà enregistré."}), 400
+
         # Check if files are present
         if 'avatar' not in request.files or 'resume' not in request.files:
-            return jsonify({"error": "Avatar and resume files are required"}), 400
+            return jsonify({"error": "Les fichiers d’avatar et de CV sont requis."}), 400
         avatar = request.files['avatar']
         resume = request.files['resume']
 
         # Validate files
         if avatar.filename == '' or resume.filename == '':
-            return jsonify({"error": "No selected file"}), 400
+            return jsonify({"error": "Aucun fichier sélectionné."}), 400
         if not (allowed_file(avatar.filename) and allowed_file(resume.filename)):
-            return jsonify({"error": "Invalid file type"}), 400
+            return jsonify({"error": "Type de fichier invalide."}), 400
 
         # Process file uploads
         avatar_filename = secure_filename(f"avatar_{datetime.now().strftime('%Y%m%d%H%M%S')}_{avatar.filename}")
         resume_filename = secure_filename(f"resume_{datetime.now().strftime('%Y%m%d%H%M%S')}_{resume.filename}")
         avatar.save(os.path.join(app.config['UPLOAD_FOLDER'], avatar_filename))
         resume.save(os.path.join(app.config['UPLOAD_FOLDER'], resume_filename))
-
-        # Get form data
-        data = request.form
 
         # Create candidate document with status field
         candidate = {
@@ -216,11 +237,40 @@ def candidate_signup():
             experience.append(exp)
         candidate['experience'] = experience
 
+        # Process professional formation
+        professional_formation = []
+        professional_formation_count = int(data.get('professional_formation_count', 0))
+        for i in range(professional_formation_count):
+            pf = {
+                'title': data[f'professional_formation[{i}][title]'],
+                'institution': data[f'professional_formation[{i}][institution]'],
+                'start_date': data[f'professional_formation[{i}][start_date]'],
+                'end_date': data.get(f'professional_formation[{i}][end_date]'),
+                'description': data.get(f'professional_formation[{i}][description]', '')
+            }
+            professional_formation.append(pf)
+        candidate['professional_formation'] = professional_formation
+
+        # Process projects
+        projects = []
+        projects_count = int(data.get('projects_count', 0))
+        for i in range(projects_count):
+            project = {
+                'name': data[f'projects[{i}][name]'],
+                'description': data[f'projects[{i}][description]'],
+                'link': data.get(f'projects[{i}][link]', '')
+            }
+            projects.append(project)
+        candidate['projects'] = projects
+
         # Insert into database
         result = mongo.db.candidates.insert_one(candidate)
 
+        # Generate JWT token for the new candidate
+        access_token = create_access_token(identity=str(result.inserted_id))
+
         notification = {
-            "text": f"New candidate registration: {candidate['first_name']} {candidate['last_name']}",
+            "text": f"Nouvelle inscription de candidat: {candidate['first_name']} {candidate['last_name']}",
             "time": datetime.utcnow().isoformat(),
             "unread": True,
             "type": "new_candidate",
@@ -231,15 +281,21 @@ def candidate_signup():
 
         return jsonify({
             "success": True,
-            "message": "Candidate created successfully. Your account is pending approval.",
+            "message": "Candidat créé avec succès. Votre compte est en attente d'approbation.",
             "status": "pending",
             "avatar_url": f"/uploads/{avatar_filename}",
-            "resume_url": f"/uploads/{resume_filename}"
+            "resume_url": f"/uploads/{resume_filename}",
+            "token": access_token,  # <-- Add this
+            "user_id": str(result.inserted_id),
+            "first_name": candidate['first_name'],
+            "last_name": candidate['last_name'],
+            "email": candidate['email'],
+            "user_type": "candidate"
         }), 201
 
     except Exception as e:
         app.logger.error(f"Error in candidate_signup: {str(e)}")
-        return jsonify({"error": "An unexpected error occurred"}), 500
+        return jsonify({"error": "Une erreur inattendue s'est produite."}), 500
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
@@ -248,6 +304,30 @@ def uploaded_file(filename):
 @app.route('/company/signup', methods=['POST'])
 def company_signup():
     try:
+        data = request.form
+
+        required_fields = ['company_name', 'email', 'password', 'confirm_password', 'industry']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({"error": f"{field.replace('_', ' ').capitalize()} est requis(e)"}), 400
+
+        # Email format
+        import re
+        email = data['email']
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+            return jsonify({"error": "Format d’e-mail invalide"}), 400
+
+        # Password strength
+        password = data['password']
+        if len(password) < 8:
+            return jsonify({"error": "Le mot de passe doit contenir au moins 8 caractères."}), 400
+        if password != data['confirm_password']:
+            return jsonify({"error": "Les mots de passe ne correspondent pas."}), 400
+
+        # Unique email check (candidates & companies)
+        if mongo.db.companies.find_one({'email': email}) or mongo.db.candidates.find_one({'email': email}):
+            return jsonify({"error": "E-mail déjà enregistré."}), 400
+
         # Check if logo file is present
         logo = None
         logo_filename = None
@@ -255,28 +335,11 @@ def company_signup():
             logo = request.files['logo']
             if logo.filename != '':
                 if not allowed_file(logo.filename):
-                    return jsonify({"error": "Invalid file type for logo"}), 400
+                    return jsonify({"error": "Type de fichier invalide pour le logo."}), 400
                 
                 logo_filename = secure_filename(f"logo_{datetime.now().strftime('%Y%m%d%H%M%S')}_{logo.filename}")
                 logo.save(os.path.join(app.config['UPLOAD_FOLDER'], logo_filename))
 
-        # Get form data
-        data = request.form
-        
-        # Validate required fields
-        required_fields = ['company_name', 'email', 'password', 'industry']
-        for field in required_fields:
-            if field not in data or not data[field]:
-                return jsonify({"error": f"{field.replace('_', ' ').title()} is required"}), 400
-        
-        # Check if email already exists
-        if mongo.db.companies.find_one({'email': data['email']}) or mongo.db.candidates.find_one({'email': data['email']}):
-            return jsonify({"error": "Email already registered"}), 400
-        
-        # Check password match
-        if 'confirm_password' in data and data['password'] != data['confirm_password']:
-            return jsonify({"error": "Passwords do not match"}), 400
-        
         # Create company document
         company = {
             'company_name': data['company_name'],
@@ -300,20 +363,27 @@ def company_signup():
         # Insert into database
         result = mongo.db.companies.insert_one(company)
         
+        # Generate JWT token for the new company
+        access_token = create_access_token(identity=str(result.inserted_id))
+
         response_data = {
             "success": True,
-            "message": "Company registered successfully",
-            "company_id": str(result.inserted_id)
+            "message": "Entreprise enregistrée avec succès.",
+            "company_id": str(result.inserted_id),
+            "token": access_token,  
+            "company_name": company['company_name'],
+            "email": company['email'],
+            "user_type": "company"
         }
-        
+
         if logo_filename:
             response_data["logo_url"] = f"/uploads/{logo_filename}"
-        
+
         return jsonify(response_data), 201
         
     except Exception as e:
         app.logger.error(f"Error in company_signup: {str(e)}")
-        return jsonify({"error": "An unexpected error occurred during registration"}), 500
+        return jsonify({"error": "Une erreur inattendue s’est produite lors de l’inscription."}), 500
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -323,7 +393,7 @@ def login():
 
         if not data.get('email') or not data.get('password'):
             logging.warning("Login failed: Email or password missing in request.")
-            return jsonify({"error": "Email and password are required"}), 400
+            return jsonify({"error": "L’e-mail et le mot de passe sont requis."}), 400
 
         email = data['email']
         password = data['password']
@@ -331,15 +401,8 @@ def login():
         # Check in candidates collection (ONLY MODIFIED THIS SECTION)
         candidate = mongo.db.candidates.find_one({'email': email})
         if candidate:
-            logging.info(f"Found candidate with email: {email}, checking password...")
+            logging.info(f"Found candidate with email: {email}, Vérification du mot de passe...")
             if check_password_hash(candidate['password'], password):
-                # NEW STATUS CHECK FOR CANDIDATES ONLY
-                if candidate.get('status') != 'active':
-                    return jsonify({
-                        "error": "Your candidate account is not yet approved",
-                        "account_status": candidate.get('status', 'pending')
-                    }), 403
-                
                 access_token = create_access_token(identity=str(candidate['_id']))
                 return jsonify({
                     "message": "Login successful",
@@ -363,7 +426,7 @@ def login():
                 access_token = create_access_token(identity=str(company['_id']))
                 logging.info(f"Login successful for company: {email}, user_id: {company['_id']}")
                 return jsonify({
-                    "message": "Login successful",
+                    "message": "Connexion réussie.",
                     "token": access_token,
                     "user_id": str(company['_id']),
                     "company_name": company['company_name'],
@@ -384,7 +447,7 @@ def login():
                                                    additional_claims={"user_type": "admin"})
                 logging.info(f"Login successful for admin: {email}, user_id: {admin_user['_id']}, role: {admin_user.get('role')}")
                 return jsonify({
-                    "message": "Login successful",
+                    "message": "Connexion réussie.",
                     "token": access_token,
                     "user_id": str(admin_user['_id']),
                     "email": admin_user['email'],
@@ -396,7 +459,7 @@ def login():
             logging.info(f"No admin found with email: {email}")
 
         logging.warning(f"Login failed for email: {email}, invalid credentials.")
-        return jsonify({"error": "Invalid credentials"}), 401
+        return jsonify({"error": "Identifiants invalides."}), 401
 
     except Exception as e:
         logging.error(f"Login error: {str(e)}")
@@ -411,7 +474,7 @@ def logout():
             app.logger.error("Missing required JWT claims")
             return jsonify({
                 "success": False,
-                "error": "Invalid token structure"
+                "error": "Structure de jeton invalide."
             }), 400
 
         # Blacklist the token for all user types
@@ -427,12 +490,12 @@ def logout():
             app.logger.error("Failed to blacklist token")
             return jsonify({
                 "success": False,
-                "error": "Failed to process logout"
+                "error": "Échec du traitement de la déconnexion."
             }), 500
 
         response = jsonify({
             "success": True,
-            "message": "Logout successful"
+            "message": "Déconnexion réussie."
         })
         
         unset_jwt_cookies(response)
@@ -448,14 +511,14 @@ def logout():
         app.logger.error(f"MongoDB error during logout: {str(e)}")
         return jsonify({
             "success": False,
-            "error": "Database error during logout"
+            "error": "Erreur de base de données lors de la déconnexion."
         }), 500
         
     except Exception as e:
         app.logger.error(f"Unexpected logout error: {str(e)}", exc_info=True)
         return jsonify({
             "success": False,
-            "error": "An unexpected error occurred"
+            "error": "Une erreur inattendue s'est produite."
         }), 500
 
 # Add this new endpoint to check auth status
@@ -479,7 +542,7 @@ def get_company_profile():
         
         company = mongo.db.companies.find_one({'_id': ObjectId(current_user_id)})
         if not company:
-            return jsonify({"error": "Company not found"}), 404
+            return jsonify({"error": "Entreprise non trouvée."}), 404
         
         profile_data = {
             'company_name': company.get('company_name'),
@@ -499,7 +562,7 @@ def get_company_profile():
         
     except Exception as e:
         app.logger.error(f"Error fetching company profile: {str(e)}")
-        return jsonify({"error": "An error occurred while fetching profile"}), 500
+        return jsonify({"error": "Une erreur s’est produite lors de la récupération du profil."}), 500
 
 @app.route('/company/update', methods=['PUT'])
 @jwt_required()
@@ -508,7 +571,7 @@ def update_company_profile():
         current_user_id = get_jwt_identity()
         company = mongo.db.companies.find_one({'_id': ObjectId(current_user_id)})
         if not company:
-            return jsonify({"error": "Company not found"}), 404
+            return jsonify({"error": "Entreprise non trouvée."}), 404
         
         update_data = {}
         logo_filename = company.get('logo')
@@ -518,7 +581,7 @@ def update_company_profile():
             logo = request.files['logo']
             if logo.filename != '':
                 if not allowed_file(logo.filename):
-                    return jsonify({"error": "Invalid file type for logo"}), 400
+                    return jsonify({"error": "Type de fichier invalide pour le logo."}), 400
                 
                 if logo_filename:
                     try:
@@ -540,9 +603,9 @@ def update_company_profile():
         
         # Validate required fields
         if 'company_name' in update_data and not update_data['company_name']:
-            return jsonify({"error": "Company name is required"}), 400
+            return jsonify({"error": "Le nom de l’entreprise est requis."}), 400
         if 'email' in update_data and not update_data['email']:
-            return jsonify({"error": "Email is required"}), 400
+            return jsonify({"error": "L’e-mail est requis."}), 400
         
         update_data['updated_at'] = datetime.now()
         
@@ -570,7 +633,7 @@ def update_company_profile():
         
     except Exception as e:
         app.logger.error(f"Error updating company profile: {str(e)}")
-        return jsonify({"error": "An error occurred while updating profile"}), 500
+        return jsonify({"error": "Une erreur s’est produite lors de la mise à jour du profil."}), 500
 
 @app.route('/company/jobs', methods=['GET'])
 @jwt_required()
@@ -580,7 +643,7 @@ def get_all_jobs():
 
         jobs_cursor = mongo.db.jobs.find({
             'company_id': ObjectId(current_user_id),
-            'status': {'$in': ['active', 'closed']}  # Only these two statuses
+            'status': {'$in': ['active', 'closed']}  
         }).sort('created_at', -1)
 
         jobs = []
@@ -601,11 +664,11 @@ def get_all_jobs():
 
     except Exception as e:
         app.logger.error(f"Error in get_all_jobs: {str(e)}")
-        return jsonify({"error": "An unexpected error occurred"}), 500
+        return jsonify({"error": "Une erreur inattendue s’est produite."}), 500
 
     except Exception as e:
         app.logger.error(f"Error in get_all_jobs: {str(e)}")
-        return jsonify({"error": "An unexpected error occurred"}), 500
+        return jsonify({"error": "Une erreur inattendue s'est produite."}), 500
 
 @app.route('/company/addJob', methods=['POST'])
 @jwt_required()
@@ -617,7 +680,7 @@ def add_job():
         required_fields = ['job_title', 'salary', 'looking_for_profile', 'required_experience']
         for field in required_fields:
             if field not in data or not data[field]:
-                return jsonify({"error": f"{field.replace('_', ' ')} is required"}), 400
+                return jsonify({"error": f"{field.replace('_', ' ')} est requis(e)"}), 400
 
         required_skills = []
         if 'required_skills' in data:
@@ -643,13 +706,13 @@ def add_job():
         
         return jsonify({
             "success": True,
-            "message": "Job added successfully",
+            "message": "Offre ajoutée avec succès.",
             "job_id": str(result.inserted_id)
-        }), 201
+        }, 201)
 
     except Exception as e:
         app.logger.error(f"Error in add_job: {str(e)}")
-        return jsonify({"error": "An unexpected error occurred"}), 500
+        return jsonify({"error": "Une erreur inattendue s'est produite."}), 500
 
 @app.route('/company/editJob/<job_id>', methods=['PUT'])
 @jwt_required()
@@ -665,7 +728,7 @@ def edit_job(job_id):
         })
         
         if not job:
-            return jsonify({"error": "Job not found"}), 404
+            return jsonify({"error": "Offre non trouvée."}), 404
 
         update_data = {
             'job_title': data.get('job_title', job['job_title']).lower(),
@@ -675,7 +738,6 @@ def edit_job(job_id):
             'updated_at': datetime.now()
         }
 
-        # Handle skills update
         if 'required_skills' in data:
             if isinstance(data['required_skills'], str):
                 update_data['required_skills'] = [skill.strip().lower() for skill in data['required_skills'].split(',') if skill.strip()]
@@ -689,14 +751,13 @@ def edit_job(job_id):
 
         return jsonify({
             "success": True,
-            "message": "Job updated successfully"
+            "message": "Offre mise à jour avec succès."
         }), 200
 
     except Exception as e:
         app.logger.error(f"Error in edit_job: {str(e)}")
-        return jsonify({"error": "An unexpected error occurred"}), 500
+        return jsonify({"error": "Une erreur inattendue s'est produite."}), 500
 
-# Move this route and function to the top level (not nested inside edit_job)
 @app.route('/company/jobs/<job_id>/status', methods=['PATCH'])
 @jwt_required()
 def update_job_status(job_id):
@@ -705,7 +766,7 @@ def update_job_status(job_id):
         data = request.json
 
         if 'status' not in data or data['status'] not in ['active', 'closed']:
-            return jsonify({"error": "Invalid status"}), 400
+            return jsonify({"error": "Statut invalide."}), 400
 
         # Verify job belongs to company
         job = mongo.db.jobs.find_one({
@@ -714,7 +775,7 @@ def update_job_status(job_id):
         })
 
         if not job:
-            return jsonify({"error": "Job not found"}), 404
+            return jsonify({"error": "Offre non trouvée."}), 404
 
         mongo.db.jobs.update_one(
             {'_id': ObjectId(job_id)},
@@ -723,12 +784,12 @@ def update_job_status(job_id):
 
         return jsonify({
             "success": True,
-            "message": "Job status updated successfully"
+            "message": "Statut de l’offre mis à jour avec succès."
         }), 200
 
     except Exception as e:
         app.logger.error(f"Error in update_job_status: {str(e)}")
-        return jsonify({"error": "An unexpected error occurred"}), 500
+        return jsonify({"error": "Une erreur inattendue s'est produite."}), 500
 
 @app.route('/company/candidates', methods=['GET'])
 @jwt_required()
@@ -759,15 +820,16 @@ def get_candidates_for_company():
                 'skills': candidate.get('skills', []),
                 'education': latest_education,
                 'experience': latest_experience,
-                'resume_url': f"http://localhost:5000/uploads/{candidate.get('resume')}" if candidate.get('resume') else None ,
-                'adminCV': f"http://localhost:5000/uploads/{candidate.get('adminCV')}" if candidate.get('adminCV') else None 
+                'resume_url': f"http://localhost:5000/uploads/{candidate.get('resume')}" if candidate.get('resume') else None,
+                'adminCV': f"http://localhost:5000/uploads/{candidate.get('adminCV')}" if candidate.get('adminCV') else None,
+                'status': candidate.get('status', 'pending')  # <-- Add this line
             })
 
         return jsonify(candidates), 200
 
     except Exception as e:
         app.logger.error(f"Error fetching candidates: {str(e)}")
-        return jsonify({"error": "An error occurred while fetching candidates"}), 500
+        return jsonify({"error": "Une erreur s’est produite lors de la récupération des candidats."}), 500
 
 @app.route('/company/candidates/<string:candidate_id>', methods=['GET'])
 @jwt_required()
@@ -775,7 +837,7 @@ def get_candidate_details(candidate_id):
     try:
         candidate = mongo.db.candidates.find_one({'_id': ObjectId(candidate_id)})
         if not candidate:
-            return jsonify({"error": "Candidate not found"}), 404
+            return jsonify({"error": "Candidat non trouvé."}), 404
 
         return jsonify({
             'id': str(candidate.get('_id')),
@@ -793,12 +855,11 @@ def get_candidate_details(candidate_id):
 
     except Exception as e:
         app.logger.error(f"Error fetching candidate details: {str(e)}")
-        return jsonify({"error": "An error occurred while fetching candidate details"}), 500    
+        return jsonify({"error": "Une erreur s’est produite lors de la récupération des détails du candidat."}), 500    
     
 @app.route('/admin/users', methods=['GET'])
 def get_all_users():
     try:
-        # Récupérer les paramètres de filtre depuis la requête
         filter_type = request.args.get('type')  # 'candidate' ou 'company'
         status_filter = request.args.get('status')
         name_filter = request.args.get('name', '').lower()
@@ -829,13 +890,16 @@ def get_all_users():
                 'type': 'candidate',
                 'status': candidate.get('status'),
                 'created_at': formatted_date,
-                '_created_at_obj': created_at,  # pour tri interne
+                'photo': f"http://localhost:5000/uploads/{candidate.get('avatar')}" if candidate.get('avatar') else None,  # <-- ADD THIS
                 'CV': f"http://localhost:5000/uploads/{candidate.get('resume')}" if candidate.get('resume') else None,
-                'adminCV': f"http://localhost:5000/uploads/{candidate.get('adminCV')}" if candidate.get('adminCV') else None ,
-                'formation_name': ', '.join(candidate.get('growcoach_formation', [])) if isinstance(candidate.get('growcoach_formation', []), list) else candidate.get('growcoach_formation', '')
+                'adminCV': f"http://localhost:5000/uploads/{candidate.get('adminCV')}" if candidate.get('adminCV') else None,
+                'formation_name': ', '.join(candidate.get('growcoach_formation', [])) if isinstance(candidate.get('growcoach_formation', []), list) else candidate.get('growcoach_formation', ''),
+                'has_growcoach_formation': (
+                    bool(candidate.get('has_growcoach_formation')) or
+                    (isinstance(candidate.get('growcoach_formation', []), list) and len(candidate.get('growcoach_formation', [])) > 0)
+                )
             })
 
-        # N'ajouter les companies que si on ne filtre PAS sur la formation
         if not has_growcoach_formation:
             companies = mongo.db.companies.find()
             for company in companies:
@@ -849,7 +913,7 @@ def get_all_users():
                     'type': 'company',
                     'status': company.get('status'),
                     'created_at': formatted_date,
-                    '_created_at_obj': created_at,  # pour tri interne
+                    'logo': f"http://localhost:5000/uploads/{company.get('logo')}" if company.get('logo') else None,  # <-- ADD THIS
                     'CV': '',
                     'verified': company.get('verified', False)
                 })
@@ -876,7 +940,7 @@ def get_all_users():
 
     except Exception as e:
         app.logger.error(f"Error in get_all_users: {str(e)}")
-        return jsonify({"error": "An unexpected error occurred"}), 500
+        return jsonify({"error": "Une erreur inattendue s'est produite."}), 500
     
 @app.route('/admin/candidates/<candidate_id>/status', methods=['PUT'])
 def manage_candidate_status(candidate_id):
@@ -894,7 +958,7 @@ def manage_candidate_status(candidate_id):
         # Trouver le candidat
         candidate = mongo.db.candidates.find_one({"_id": ObjectId(candidate_id)})
         if not candidate:
-            return jsonify({"error": "Candidate not found"}), 404
+            return jsonify({"error": "Candidat non trouvé."}), 404
         
         # Mettre à jour le statut
         new_status = "blocked" if data['action'] == 'block' else "active"
@@ -906,7 +970,7 @@ def manage_candidate_status(candidate_id):
         
         return jsonify({
             "success": True,
-            "message": f"Candidate {new_status} successfully",
+            "message": f"Candidate {new_status} avec succès",
             "candidate_id": candidate_id,
             "status": new_status
         }), 200
@@ -935,7 +999,7 @@ def manage_company_status(company_id):
         # Trouver l'entreprise
         company = mongo.db.companies.find_one({"_id": ObjectId(company_id)})
         if not company:
-            return jsonify({"error": "Company not found"}), 404
+            return jsonify({"error": "Entreprise non trouvée."}), 404
         
         # Déterminer le nouveau statut
         status_map = {
@@ -956,7 +1020,7 @@ def manage_company_status(company_id):
         
         return jsonify({
             "success": True,
-            "message": f"Company {data['action']}ed successfully",
+            "message": f"Entreprise {data['action']} avec succès",
             "company_id": company_id,
             "status": update_data.get('status', company.get('status')),
             "verified": update_data.get('verified', company.get('verified', False))
@@ -964,18 +1028,17 @@ def manage_company_status(company_id):
         
     except Exception as e:
         app.logger.error(f"Error in manage_company_status: {str(e)}")
-        return jsonify({"error": "An unexpected error occurred"}), 500
+        return jsonify({"error": "Une erreur inattendue s'est produite."}), 500
     
 @app.route('/condidate/profile', methods=['GET'])
 @jwt_required()
 def get_conditate_profile():
     try:
         current_user_id = get_jwt_identity()
-        
         condidate = mongo.db.candidates.find_one({'_id': ObjectId(current_user_id)})
         if not condidate:
-            return jsonify({"error": "condidate not found"}), 404
-        
+            return jsonify({"error": "Candidat non trouvé."}), 404
+
         profile_data = {
             'first_name': condidate.get('first_name'),
             'last_name': condidate.get('last_name'),
@@ -991,14 +1054,17 @@ def get_conditate_profile():
             'created_at': condidate.get('created_at'),
             'updated_at': condidate.get('updated_at'),
             'education': condidate.get('education', []),
-            'experience': condidate.get('experience', [])
+            'experience': condidate.get('experience', []),
+            'professional_formation': condidate.get('professional_formation', []),  # <-- Add this
+            'projects': condidate.get('projects', []),  # <-- Add this
+            'status': condidate.get('status', 'pending'),
         }
-        
+
         return jsonify(profile_data), 200
-        
+
     except Exception as e:
         app.logger.error(f"Error fetching company profile: {str(e)}")
-        return jsonify({"error": "An error occurred while fetching profile"}), 500
+        return jsonify({"error": "Une erreur s’est produite lors de la récupération du profil."}), 500
     
 @app.route('/condidate/update', methods=['PUT'])
 @jwt_required()
@@ -1007,7 +1073,7 @@ def update_candidate_profile():
         current_user_id = get_jwt_identity()
         candidate = mongo.db.candidates.find_one({'_id': ObjectId(current_user_id)})
         if not candidate:
-            return jsonify({"error": "Candidate not found"}), 404
+            return jsonify({"error": "Candidat non trouvé."}), 404
 
         update_data = {}
         avatar_filename = candidate.get('avatar')
@@ -1017,7 +1083,7 @@ def update_candidate_profile():
             avatar = request.files['avatar']
             if avatar.filename != '':
                 if not allowed_file(avatar.filename):
-                    return jsonify({"error": "Invalid file type for avatar"}), 400
+                    return jsonify({"error": "Type de fichier invalide pour l’avatar."}), 400
 
                 # Remove old avatar if exists
                 if avatar_filename:
@@ -1039,7 +1105,6 @@ def update_candidate_profile():
             if field in request.form:
                 update_data[field] = request.form[field]
 
-        # Handle skills (as comma separated string or JSON array)
         if 'skills' in request.form:
             try:
                 import json
@@ -1051,18 +1116,14 @@ def update_candidate_profile():
             except Exception:
                 update_data['skills'] = []
 
-        # Handle education and experience (as JSON)
+        # Handle education, experience, professional_formation, projects (as JSON)
         import json
-        if 'education' in request.form:
-            try:
-                update_data['education'] = json.loads(request.form['education'])
-            except Exception:
-                update_data['education'] = []
-        if 'experience' in request.form:
-            try:
-                update_data['experience'] = json.loads(request.form['experience'])
-            except Exception:
-                update_data['experience'] = []
+        for field in ['education', 'experience', 'professional_formation', 'projects']:
+            if field in request.form:
+                try:
+                    update_data[field] = json.loads(request.form[field])
+                except Exception:
+                    update_data[field] = []
 
         update_data['updated_at'] = datetime.now()
 
@@ -1087,14 +1148,16 @@ def update_candidate_profile():
             'created_at': updated_candidate.get('created_at'),
             'updated_at': updated_candidate.get('updated_at'),
             'education': updated_candidate.get('education', []),
-            'experience': updated_candidate.get('experience', [])
+            'experience': updated_candidate.get('experience', []),
+            'professional_formation': updated_candidate.get('professional_formation', []),  
+            'projects': updated_candidate.get('projects', [])  
         }
 
         return jsonify(response_data), 200
 
     except Exception as e:
         app.logger.error(f"Error updating candidate profile: {str(e)}")
-        return jsonify({"error": "An error occurred while updating profile"}), 500
+        return jsonify({"error": "Une erreur s’est produite lors de la mise à jour du profil."}), 500
     
 @app.route('/jobs', methods=['GET'])
 def get_all_jobs_public():
@@ -1123,12 +1186,12 @@ def get_all_jobs_public():
                 'created_at': job.get('created_at').strftime('%Y-%m-%d') if job.get('created_at') else '',
                 'company_id': str(job.get('company_id')) if job.get('company_id') else '',
                 'applicants': job.get('applicants', []),
-                **company_data  # This spreads the company data into the job object
+                **company_data  
             })
         return jsonify(jobs), 200
     except Exception as e:
         app.logger.error(f"Error in get_all_jobs_public: {str(e)}")
-        return jsonify({"error": "An unexpected error occurred"}), 500
+        return jsonify({"error": "Une erreur inattendue s’est produite."}), 500
     
 @app.route('/jobs/<job_id>/apply', methods=['POST'])
 @jwt_required()
@@ -1140,15 +1203,15 @@ def apply_to_job(job_id):
             return jsonify({'error': 'Missing candidate_id'}), 400
         job = mongo.db.jobs.find_one({'_id': ObjectId(job_id)})
         if not job:
-            return jsonify({'error': 'Job not found'}), 404
+            return jsonify({'error': 'Offre non trouvée.'}), 404
         # Prevent duplicate applications
         if candidate_id in job.get('applicants', []):
-            return jsonify({'error': 'Already applied'}), 400
+            return jsonify({'error': 'Candidature envoyée.'}), 400
         mongo.db.jobs.update_one(
             {'_id': ObjectId(job_id)},
             {'$addToSet': {'applicants': candidate_id}}
         )
-        return jsonify({'message': 'Applied successfully'}), 200
+        return jsonify({'message': 'Candidature envoyée avec succès.'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -1169,7 +1232,7 @@ def request_verification():
 
         # Créer la notification pour l’admin
         notification = {
-            "text": f"{company['company_name']} has made a verification request",
+            "text": f"{company['company_name']} a fait une demande de vérification.",
             "time": datetime.utcnow().isoformat(),
             "unread": True,
             "type": "verification_request",
@@ -1178,7 +1241,7 @@ def request_verification():
         }
         mongo.db.admin_notifications.insert_one(notification)
 
-        return jsonify({"success": True, "message": "Verification request sent"}), 200
+        return jsonify({"success": True, "message": "Demande de vérification envoyée."}), 200
 
     except Exception as e:
         app.logger.error(f"Verification request error: {str(e)}")
@@ -1195,9 +1258,9 @@ def get_admin_notifications():
 
     notifications = list(mongo.db.admin_notifications.find().sort("time", -1))
     for n in notifications:
-        n['id'] = str(n['_id'])
-        n.pop('_id', None)
-    return jsonify(notifications), 200    
+        n['_id'] = str(n['_id'])  # <-- Garde le champ _id sous forme de string
+    return jsonify(notifications), 200
+      
 
 
 @app.route('/api/company/verification-status', methods=['GET'])
@@ -1227,7 +1290,7 @@ def get_job_applicants(job_id):
         # Get the job to verify it belongs to the company
         job = mongo.db.jobs.find_one({'_id': ObjectId(job_id)})
         if not job:
-            return jsonify({'error': 'Job not found'}), 404
+            return jsonify({'error': 'Offre non trouvée.'}), 404
 
         # Get all applicants for this job
         applicants = []
@@ -1236,16 +1299,18 @@ def get_job_applicants(job_id):
             if candidate:
                 applicants.append({
                     'id': str(candidate['_id']),
-                    'firstName': candidate.get('first_name', ''), # Corrected key
-                    'lastName': candidate.get('last_name', ''),   # Corrected key
+                    'firstName': candidate.get('first_name', ''),
+                    'lastName': candidate.get('last_name', ''),
                     'email': candidate.get('email', ''),
-                    'resume_url': f"http://localhost:5000/uploads/{candidate.get('resume')}" if candidate.get('resume') else None # Corrected URL construction
+                    'resume_url': f"http://localhost:5000/uploads/{candidate.get('resume')}" if candidate.get('resume') else None,
+                    'adminCV': f"http://localhost:5000/uploads/{candidate.get('adminCV')}" if candidate.get('adminCV') else None,
+                    'status': candidate.get('status', 'pending')  # <-- This line is correct
                 })
 
         return jsonify(applicants)
     except Exception as e:
         app.logger.error(f"Error fetching job applicants: {str(e)}") # Added logging
-        return jsonify({'error': 'An unexpected error occurred'}), 500 # Generic error for safety
+        return jsonify({'error': 'Une erreur inattendue s`est produite.'}), 500 # Generic error for safety
 
 
 @app.route('/candidate/save-job/<job_id>', methods=['POST'])
@@ -1254,7 +1319,7 @@ def save_job(job_id):
     user_id = get_jwt_identity()
     candidate = mongo.db.candidates.find_one({'_id': ObjectId(user_id)})
     if not candidate:
-        return jsonify({'error': 'Candidate not found'}), 404
+        return jsonify({'error': 'Candidat non trouvé.'}), 404
 
     action = request.json.get('action', 'save')  # 'save' ou 'unsave'
     if action == 'save':
@@ -1319,7 +1384,7 @@ def approve_candidate(candidate_id):
         # Verify admin authentication
         jwt_data = get_jwt()
         if jwt_data.get('user_type') != 'admin':
-            return jsonify({"error": "Unauthorized"}), 401
+            return jsonify({"error": "Non autorisé"}), 401
 
         # Update candidate status
         result = mongo.db.candidates.update_one(
@@ -1328,18 +1393,36 @@ def approve_candidate(candidate_id):
         )
 
         if result.modified_count == 0:
-            return jsonify({"error": "Candidate not found"}), 404
+            return jsonify({"error": "Candidat non trouvé"}), 404
 
         # Mark notification as read
         mongo.db.admin_notifications.delete_many(
             {'candidate_id': candidate_id, 'type': 'new_candidate'}
         )
 
-        return jsonify({"success": True, "message": "Candidate approved successfully"}), 200
+        return jsonify({"success": True, "message": "Candidat approuvé avec succès"}), 200
 
     except Exception as e:
         app.logger.error(f"Error approving candidate: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+@app.route('/admin/users/<user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    try:
+        # Try to delete from candidates
+        result = mongo.db.candidates.delete_one({'_id': ObjectId(user_id)})
+        if result.deleted_count:
+            return jsonify({"success": True, "message": "Candidat supprimé"}), 200
+
+        # Try to delete from companies
+        result = mongo.db.companies.delete_one({'_id': ObjectId(user_id)})
+        if result.deleted_count:
+            return jsonify({"success": True, "message": "Entreprise deleted"}), 200
+
+        return jsonify({"error": "User not found"}), 404
+    except Exception as e:
+        app.logger.error(f"Error deleting user: {str(e)}")
+        return jsonify({"error": "An unexpected error occurred"}), 500
 
 
 if __name__ == '__main__':
